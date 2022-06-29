@@ -1,19 +1,25 @@
 import datetime
 import pandas as pd
-import plotly.graph_objects as go
-from nsepy import get_history
-from nsepy import get_index_pe_history
-from nsepy import get_rbi_ref_history
-from nsepy.history import get_price_list
+import pandas_datareader.data as web
+# import plotly.graph_objects as go
+# from nsepy import get_history
+# from nsepy import get_index_pe_history
+# from nsepy import get_rbi_ref_history
+# from nsepy.history import get_price_list
 
 start = datetime.datetime(2022, 1, 1)
 end = datetime.datetime(2022, 1, 31)
-date = datetime.datetime(2022, 1, 31)
+# date = datetime.datetime(2022, 1, 31)
 
-nse = get_rbi_ref_history(start=start, end=end)
-print(nse)
+df = web.DataReader("NSE","yahoo", start, end)
+pd.options.display.width = 0
+df = df.drop('Adj Close', axis=1)
+print(df)
 
-prices = get_price_list(dt=date)
+# nse = get_rbi_ref_history(start=start, end=end)
+# print(nse)
+
+# prices = get_price_list(dt=date)
 
 # data = pd.read_html('https://ournifty.com/stock-list-in-nse-fo-futures-and-options.html#:~:text=NSE%20F%26O%20Stock%20List%3A%20%20%20%20SL,%20%201000%20%2052%20more%20rows%20')[0]
 # labels = data.loc[[124,126,127]]
