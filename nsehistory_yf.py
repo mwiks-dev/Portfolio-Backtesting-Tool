@@ -29,15 +29,3 @@ print(nse_history)
 
 nse_history.to_csv('output.csv')
 
-# nse_data = yf.download('NSE',start='2021-2-1',end='2021-2-28',auto_adjust=True)
-# print (nse_data)
-
-# df = yf.download('NSE TSLA',start='2021-2-1',end='2021-2-28')
-# df = df.drop(['Open','High','Low','Volume','Adj Close'], axis=1)
-# print (df)  
-# print('For nse ticket info lines')
-# print(nse.info)
-# print('For nse ticket info lines')
-# print(nse.actions)
-
-

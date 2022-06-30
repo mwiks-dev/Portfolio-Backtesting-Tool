@@ -1,20 +1,25 @@
 import datetime
+from os import symlink
 import pandas as pd
 import pandas_datareader.data as web
-# import plotly.graph_objects as go
-# from nsepy import get_history
-# from nsepy import get_index_pe_history
-# from nsepy import get_rbi_ref_history
-# from nsepy.history import get_price_list
 
-start = datetime.datetime(2022, 1, 1)
-end = datetime.datetime(2022, 1, 31)
+print('Enter valid SYMBOL')
+symbol = input('')
+print('Enter start date in YYYY-MM-DD format')
+s_time = datetime.datetime.strptime(input(''), '%Y-%m-%d')
+print('Enter end date in YYYY-MM-DD format')
+e_time = datetime.datetime.strptime(input(''), '%Y-%m-%d')
+
 # date = datetime.datetime(2022, 1, 31)
 
-df = web.DataReader("NSE","yahoo", start, end)
+# df = web.DataReader("NSE","yahoo", start, end)
+df = web.DataReader(symbol,'yahoo', start=s_time, end=e_time)
+
 pd.options.display.width = 0
 df = df.drop('Adj Close', axis=1)
 print(df)
+df.to_csv('history.csv')
+
 
 # nse = get_rbi_ref_history(start=start, end=end)
 # print(nse)
