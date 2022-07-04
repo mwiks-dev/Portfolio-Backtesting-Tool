@@ -1,3 +1,5 @@
+from click import style
+import matplotlib as mpl
 import yfinance as yf
 import pandas as pd
 import datetime as dt
@@ -18,16 +20,41 @@ nse_history = nse.history(start=s_time, end= e_time,actions=False,prepost=True)
 pd.options.display.width = 0
 pd.set_option('display.max_rows',20000)
 pd.set_option('display.max_columns',6)
-# %matplotlib inline
-plt.rcParams['figure.figsize'] = (10, 6)
-plt.ioff()
+
 nse_history['Price Change'] = nse_history['Close'].rolling(window=30).mean()
 nse_history['Volume Change'] = nse_history['Volume'].rolling(window=30).mean()
 nse_history = nse_history[nse_history['Price Change'].notna()]
 nse_history.to_csv('output.csv')
-print(nse_history)
-
 # tickers = pd.read_csv('output.csv')
+parse_dates = ['Date_column']
+tickers = pd.read_csv('output.csv', parse_dates=['Date'])
+tickers.head()
+print(tickers.head())
+print(tickers.info())
+
+fig, ax = plt.subplots(figsize=(10,10))
+
+# ax.plot(tickers['Date'], tickers['Price Change'], color='red')
+# ax.set(xlabel='Date', ylabel='Price Change',title='NSE Price Change')
+# plt.show()
+
+# close = nse_history['Close']
+# pplot = nse_history['Price Change']
+# vplot = nse_history['Volume Change']
+
+# mpl.rc('figure', figsize=(15,10))
+# # style.use('ggplot')
+
+# # plt.plot(pplot,vplot)
+# # plt.show()
+
+
+# # close.plot(label=stock,legend=True)
+# pplot.plot(label='Price Change 30d',legend=True , marker="*")
+# vplot.plot(secondary_y = True, label='Volume Change 30d',legend=True,marker='*')
+# plt.plot(pplot,vplot)
+# plt.show()
+
 # print(tickers)
 # stocksH = (
 #     pd.concat(
