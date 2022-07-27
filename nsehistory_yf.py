@@ -5,88 +5,96 @@ from pandas.tseries.offsets import MonthEnd
 from sqlalchemy import create_engine
 
 
-data = pd.read_html('https://ournifty.com/stock-list-in-nse-fo-futures-and-options.html#:~:text=NSE%20F%26O%20Stock%20List%3A%20%20%20%20SL,%20%201000%20%2052%20more%20rows%20')[0]
-data['SYMBOL'].to_csv('CSV/symbol.csv')
-tickers = pd.read_csv('CSV/symbol.csv', header=None)[1].tolist()
-tickers.pop(0)
-
+data = pd.read_csv('https://www1.nseindia.com/content/indices/ind_nifty50list.csv',header=None)[2].tolist()
+data.pop(0)
+tickers = data
+# print(tickers)
 tickerdata = []
 
-for ticker in tickers:
-    tickerdata.append(yf.download(ticker, start='2022-01-01', end='2022-07-04').reset_index())
+for symbol in tickers:
+    symbol+='.NS'
+    print(symbol)
+    tickerdata.append(yf.download(symbol,start='2017-01-01', end='2018-01-01').reset_index())
+    # print(tickerdata)
 
-engine = create_engine('postgresql://mwiks-dev:1455@localhost/nsehistory')
+engine = create_engine('postgresql://mwiks-dev:1455@localhost/nsedb')
 
-for frame, symbol in zip(tickerdata, tickers):
-    frame.to_csv('CSV/' + symbol + '.csv', index=False)
+for frame,symbol in zip(tickerdata,tickers):
+    frame.to_csv('CSV/'+symbol+'.csv')
 
-for frame,symbol in zip(tickerdata, tickers):
-    frame.to_sql(symbol, engine, index=False)
+for frame,symbol in zip(tickerdata,tickers):
+    frame.to_sql(symbol, engine, if_exists='replace', index=False)
+    print(symbol+' done')
 
-# print(tickerdata)
+# df = pd.concat(tickerdata)
+# print(df)
 
-# print(pd.read_sql(f'SELECT "Date" ,"Adj Close" FROM "ACC"', engine))
-df = pd.DataFrame()
+# pd.set_option('display.max_columns',185)
+# pd.set_option('display.max_rows',125)
 
-for name in tickers:
-    df = df.append(pd.read_sql(\
-        f'SELECT "Date" ,"Adj Close" AS "{name}" FROM "{name}"', engine))
-pd.set_option('display.max_columns',185)
 
-df = df.groupby("Date").sum()
-df.index = pd.to_datetime(df.index)
+# df = df.groupby("Date")
+# df = df.set_index("Date")
 
-df.to_csv('CSV/Tickerdata.csv')
+# # df.dropna(axis=1)
+# df.to_csv('CSV/Tickerdata.csv')
+# # print(df)
 
-mtlprices  = df.resample('M').last()
-print(mtlprices)
-formation = dt.datetime(2019,1,1)
 
-begin_measurement = formation - MonthEnd(12)
-end_measurement = formation - MonthEnd(1)
+# mtlprices  = df.resample('M').last()
+# print(mtlprices)
 
-price_end = mtlprices.loc[end_measurement]
-print(price_end)
+# formation = dt.datetime(2019,1,1)
 
-price_begin = mtlprices.loc[begin_measurement]
+# begin_measurement = formation - MonthEnd(12)
+# b_time = begin_measurement.strftime('%Y-%m-%d')
+# # print(b_time)
+# end_measurement = formation - MonthEnd(1)
+# e_time = end_measurement.strftime('%Y-%m-%d')
+# # print(e_time)
 
-ret_12_1 = price_end /price_begin - 1
-print(ret_12_1)
+# price_end = mtlprices.loc[e_time]
+# # print(price_end)
 
-winners = ret_12_1.nlargest(3)
-print(winners)
+# price_begin = mtlprices.loc[b_time]
+# # print(price_begin)
 
-winnerret = mtlprices.loc[formation + MonthEnd(1), winners.index]/mtlprices.loc[formation, winners.index] - 1
-print(winnerret)
+# pct_return_12 = (price_end - price_begin) / price_begin * 100
+# print(pct_return_12.dropna())
 
-momentum_profit = winnerret.mean()
-print(momentum_profit)
+# # winners = ret_12_1.nlargest(3)
+# # print(winners)
 
-def momentumprofit(formation, holdingperiod=1):
-    begin_measurement = formation - MonthEnd(12)
-    end_measurement = formation - MonthEnd(1)
-    price_end = mtlprices.loc[end_measurement]
-    price_begin = mtlprices.loc[begin_measurement]
-    ret_12 = price_end /price_begin - 1
-    winners = ret_12.nlargest(3)
-    winnerret = mtlprices.loc[formation + MonthEnd(holdingperiod), winners.index]/mtlprices.loc[formation, winners.index] - 1
-    momentum_profit = winnerret.mean()
-    return momentum_profit
+# # winnerret = mtlprices.loc[formation + MonthEnd(1), winners.index]/mtlprices.loc[formation, winners.index] - 1
+# # print(winnerret)
 
-formation = dt.datetime(2019,1,1)
+# # momentum_profit = winnerret.mean()
+# # print(momentum_profit)
 
-momentumprofit(formation)
-print(momentumprofit(formation))
+# # def momentumprofit(formation, holdingperiod=1):
+# #     begin_measurement = formation - MonthEnd(12)
+# #     end_measurement = formation - MonthEnd(1)
+# #     price_end = mtlprices.loc[end_measurement]
+# #     price_begin = mtlprices.loc[begin_measurement]
+# #     ret_12 = price_end /price_begin - 1
+# #     winners = ret_12.nlargest(3)
+# #     winnerret = mtlprices.loc[formation + MonthEnd(holdingperiod), winners.index]/mtlprices.loc[formation, winners.index] - 1
+# #     momentum_profit = winnerret.mean()
+# #     return momentum_profit
 
-mtlprices.index
+# # formation = dt.datetime(2019,1,1)
 
-profits , dates , holding = [],[],[]
-for i in (1,3,6):
-    for j in mtlprices.index[12:-i]:
-        profits.append(momentumprofit(j, holdingperiod=i))
-        dates.append(j + MonthEnd(i))
-        holding.append(i)
+# # momentumprofit(formation)
+# # print(momentumprofit(formation))
 
-frame = pd.DataFrame({'Momentumprofit':profits,'Holdingperiod':holding},index = dates)
-frame.groupby('holdingperiod').mean()
-print(frame)
+# # mtlprices.index
+
+# # profits , dates , holding = [],[],[]
+# # for i in (1,3,6):
+# #     for j in mtlprices.index[12:-i]:
+# #         profits.append(momentumprofit(j, holdingperiod=i))
+# #         dates.append(j + MonthEnd(i))
+# #         holding.append(i)
+
+# # frame = pd.DataFrame({'Momentumprofit':profits,'Holdingperiod':holding},index = dates)
+# # frame.groupby('holdingperiod').mean()
