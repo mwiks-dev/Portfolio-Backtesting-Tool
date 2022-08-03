@@ -107,11 +107,9 @@ da = DiscreteAllocation(weights, latest_prices,total_portfolio_value= portfolio_
 
 allocation , leftover = da.lp_portfolio()
 print("Discrete allocation:", allocation)
-print("Funds:  nrupees", leftover)
+print("Funds:rupees", leftover)
 
-# frames = [df2,df5]
-# df6 = pd.concat(frames)
-# print(df6)
+
 winner_change_list = []
 for ticker in df5['Company Tickers'].values:
     better_winners = df5.loc[(df5['Expected Annual Returns'] > df5['Expected Annual Returns'][ticker]) & (df5['Expected Annual Risks'] < df5['Expected Annual Risks'][ticker])].empty

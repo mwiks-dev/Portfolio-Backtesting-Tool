@@ -26,9 +26,8 @@ for frame,symbol in zip(tickerdata,tickers):
 
 for frame,symbol in zip(tickerdata,tickers):
     frame.to_sql(symbol, engine, if_exists='replace', index=False)
-    # print(symbol+' done')
-df = pd.DataFrame()
-    
+
+df = pd.DataFrame() 
 for name in tickers:
     df = df.append(pd.read_sql(f'SELECT "Date","Open","Adj Close" AS "{name}" FROM "{name}"', engine))
 pd.set_option('display.max_columns', 185)
@@ -58,7 +57,7 @@ plt.ylabel('Annual Returns')
 plt.xlabel('Assets')
 plt.xticks(rotation=90)
 plt.title('Annual Returns of NSE Assets')
-# plt.show()
+plt.show()
 
 df2 = pd.DataFrame()
 df2['Expected Annual Returns'] = annual_returns
@@ -78,7 +77,7 @@ ax.set_ylabel('Expected Annual Returns')
 for idx, row in df2.iterrows():
     ax.annotate(row['Company Tickers'], (row['Expected Annual Risks'], row['Expected Annual Returns']), c='green')
 
-# plt.show()
+plt.show()
 
 assets = df.columns
 
@@ -108,11 +107,11 @@ allocation , leftover = da.lp_portfolio()
 # print("Funds:rupees", leftover)
 
 change_asset_list = []
-# ticker = 'ULTRACEMCO'
 for ticker in df2['Company Tickers'].values:
-    better_assets = df2.loc[(df2['Expected Annual Returns'][ticker] > df2['Expected Annual Returns']) & (df2['Expected Annual Risks'][ticker] < df2['Expected Annual Risks'])].empty
+    better_assets = df2.loc[(df2['Expected Annual Returns'] > df2['Expected Annual Returns'][ticker]) & (df2['Expected Annual Risks'] < df2['Expected Annual Risks'][ticker])].empty
     if better_assets == False:
         change_asset_list.append(ticker)
-# print(change_asset_list)
+df2.drop(change_asset_list, inplace=True)
+print(df2)
         
 
