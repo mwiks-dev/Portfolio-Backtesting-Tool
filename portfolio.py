@@ -1,11 +1,9 @@
-from nsehistory_yf import df
+from nsehistory_yf import df,df2
 import datetime as dt
 from pandas.tseries.offsets import MonthEnd
 import pandas as pd
 import yfinance as yf
 from sqlalchemy import create_engine
-
-
 
 
 mtlprices  = df.resample('M').last()
@@ -52,14 +50,38 @@ for frame,symbol in zip(winner_data,w_symbols):
     frame.to_sql(symbol, engine, if_exists='replace', index=False)
 
 df3 = pd.DataFrame()
+df5 = pd.DataFrame()
 
 for index in w_symbols:
     df3 = df3.append(pd.read_sql(f'SELECT "Date","Open","Adj Close" AS "{index}" FROM "{index}"', engine))
+    df5 = df5.append(pd.read_sql(f'SELECT "Date","Open","Adj Close" AS "{index}" FROM "{index}"', engine))
 pd.set_option('display.max_columns', 185)
 df3 = df3.set_index(pd.DatetimeIndex(df3['Date'].values))
+df5 = df5.set_index(pd.DatetimeIndex(df5['Date'].values))
+
 
 df3.drop(['Date','Open'], axis=1, inplace=True)
-# print(df3)
+df5.drop(['Date','Open'], axis=1, inplace=True)
+# print(df5)
+
+w_mtlprices = df5.resample('M').last()
+w_pre_mtlprices = df5.resample('M').first()
+
+w_monthly_returns = w_mtlprices - w_pre_mtlprices
+w_annual_returns = w_monthly_returns.mean() * 12
+
+w_annual_risks = w_monthly_returns.std() * 12
+
+sorted_winner_returns = w_annual_returns.sort_values(ascending=False)
+
+df5 = pd.DataFrame()
+df5['Expected Annual Returns'] = w_annual_returns
+df5['Expected Annual Risks'] = w_annual_risks
+df5['Company Tickers'] = df5.index
+df5['Ratio'] = df5['Expected Annual Returns']/df5['Expected Annual Risks']
+df5.sort_values(by='Ratio',axis=0,inplace=False,ascending=False)
+df5.to_csv('winner_returns.csv')
+# print(df5)
 winner_assets = df3.columns
 
 from pypfopt.efficient_frontier import EfficientFrontier
@@ -85,4 +107,16 @@ da = DiscreteAllocation(weights, latest_prices,total_portfolio_value= portfolio_
 
 allocation , leftover = da.lp_portfolio()
 print("Discrete allocation:", allocation)
-print("Funds:rupees", leftover)
+print("Funds:  nrupees", leftover)
+
+# frames = [df2,df5]
+# df6 = pd.concat(frames)
+# print(df6)
+winner_change_list = []
+for ticker in df5['Company Tickers'].values:
+    better_winners = df5.loc[(df5['Expected Annual Returns'] > df5['Expected Annual Returns'][ticker]) & (df5['Expected Annual Risks'] < df5['Expected Annual Risks'][ticker])].empty
+    if better_winners == False:
+        winner_change_list.append(ticker)
+# print(winner_change_list)
+df5.drop(winner_change_list, inplace=True)
+print(df5)

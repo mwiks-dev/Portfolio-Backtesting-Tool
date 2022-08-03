@@ -27,7 +27,6 @@ for frame,symbol in zip(tickerdata,tickers):
 for frame,symbol in zip(tickerdata,tickers):
     frame.to_sql(symbol, engine, if_exists='replace', index=False)
     # print(symbol+' done')
-
 df = pd.DataFrame()
     
 for name in tickers:
