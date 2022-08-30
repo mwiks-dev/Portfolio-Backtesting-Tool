@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 data = pd.read_csv('https://www1.nseindia.com/content/indices/ind_nifty50list.csv',header=None)[2]
 data.pop(0)
 tickers = data
-# print(tickers)
+print(tickers)
 tickerdata = []
 
 for symbol in tickers:
@@ -112,6 +112,6 @@ for ticker in df2['Company Tickers'].values:
     if better_assets == False:
         change_asset_list.append(ticker)
 df2.drop(change_asset_list, inplace=True)
-print(df2)
+# print(df2)
         
 

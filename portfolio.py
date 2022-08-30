@@ -1,4 +1,4 @@
-from nsehistory_yf import df,df2
+from nsehistory_yf import df,tickers
 import datetime as dt
 from pandas.tseries.offsets import MonthEnd
 import pandas as pd
@@ -106,9 +106,8 @@ weights = cleaned_weights
 da = DiscreteAllocation(weights, latest_prices,total_portfolio_value= portfolio_val)
 
 allocation , leftover = da.lp_portfolio()
-print("Discrete allocation:", allocation)
-print("Funds:rupees", leftover)
-
+# print("Discrete allocation:", allocation)
+# print("Funds:rupees", leftover)
 
 winner_change_list = []
 for ticker in df5['Company Tickers'].values:
@@ -117,4 +116,14 @@ for ticker in df5['Company Tickers'].values:
         winner_change_list.append(ticker)
 # print(winner_change_list)
 df5.drop(winner_change_list, inplace=True)
-print(df5)
+print(df3)
+print('Enter start date in yyyy-mm-dd')
+s_date = dt.datetime.strptime(input(''), '%Y-%m-%d')
+print('Enter end date in yyyy-mm-dd')
+e_date = dt.datetime.strptime(input(''), '%Y-%m-%d')
+details = []
+for symbol in df5:
+    details.append(yf.download(symbol,start=s_date, end=e_date).reset_index())
+print(details)
+
+
