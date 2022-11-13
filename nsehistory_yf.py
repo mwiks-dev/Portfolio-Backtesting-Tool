@@ -34,84 +34,84 @@ pd.set_option('display.max_columns', 185)
 df = df.set_index(pd.DatetimeIndex(df['Date'].values))
 
 df.drop(['Date','Open'], axis=1, inplace=True)
-# print(df)
+print(df)
 
-mtlprices  = df.resample('M').last()
-pre_mtlprices = df.resample('M').first()
+# mtlprices  = df.resample('M').last()
+# pre_mtlprices = df.resample('M').first()
 
-monthly_returns = mtlprices - pre_mtlprices
-# print(monthly_returns)
-annual_returns = monthly_returns.mean() * 12
-annual_pct_returns = annual_returns.pct_change()
-# print(annual_pct_returns)
-# print(annual_returns)
+# monthly_returns = mtlprices - pre_mtlprices
+# # print(monthly_returns)
+# annual_returns = monthly_returns.mean() * 12
+# annual_pct_returns = annual_returns.pct_change()
+# # print(annual_pct_returns)
+# # print(annual_returns)
 
-annual_risks = monthly_returns.std() * math.sqrt(12)
-# print(annual_risks)
+# annual_risks = monthly_returns.std() * math.sqrt(12)
+# # print(annual_risks)
 
-sorted_annual_returns = annual_returns.sort_values(ascending=False)
+# sorted_annual_returns = annual_returns.sort_values(ascending=False)
 # print(sorted_annual_returns)
 
-plt.bar(sorted_annual_returns.index, sorted_annual_returns.values)
-plt.ylabel('Annual Returns')
-plt.xlabel('Assets')
-plt.xticks(rotation=90)
-plt.title('Annual Returns of NSE Assets')
-plt.show()
+# plt.bar(sorted_annual_returns.index, sorted_annual_returns.values)
+# plt.ylabel('Annual Returns')
+# plt.xlabel('Assets')
+# plt.xticks(rotation=90)
+# plt.title('Annual Returns of NSE Assets')
+# plt.show()
 
-df2 = pd.DataFrame()
-df2['Expected Annual Returns'] = annual_returns
-df2['Expected Annual Risks'] = annual_risks
-df2['Company Tickers'] = df2.index
-df2['Ratio'] = df2['Expected Annual Returns']/df2['Expected Annual Risks']
-df2.sort_values(by='Ratio',axis=0,inplace=False,ascending=False)
-df2.to_csv('CSV/winners.csv')
-# print(df2)
+# df2 = pd.DataFrame()
+# df2['Expected Annual Returns'] = annual_returns
+# df2['Expected Annual Risks'] = annual_risks
+# df2['Company Tickers'] = df2.index
+# df2['Ratio'] = df2['Expected Annual Returns']/df2['Expected Annual Risks']
+# df2.sort_values(by='Ratio',axis=0,inplace=False,ascending=False)
+# df2.to_csv('CSV/winners.csv')
+# # print(df2)
 
-fig, ax = plt.subplots(figsize=(15,10))
-plt.title('Expected Annual Returns of NSE Assets vs Expected Annual Risk')
-ax.scatter(df2['Expected Annual Risks'], df2['Expected Annual Returns'], c ='red')
-ax.set_xlabel('Expected Annual Risks')
-ax.set_ylabel('Expected Annual Returns')
+# fig, ax = plt.subplots(figsize=(15,10))
+# plt.title('Expected Annual Returns of NSE Assets vs Expected Annual Risk')
+# ax.scatter(df2['Expected Annual Risks'], df2['Expected Annual Returns'], c ='red')
+# ax.set_xlabel('Expected Annual Risks')
+# ax.set_ylabel('Expected Annual Returns')
 
-for idx, row in df2.iterrows():
-    ax.annotate(row['Company Tickers'], (row['Expected Annual Risks'], row['Expected Annual Returns']), c='green')
+# for idx, row in df2.iterrows():
+#     ax.annotate(row['Company Tickers'], (row['Expected Annual Risks'], row['Expected Annual Returns']), c='green')
 
-plt.show()
+# plt.show()
 
-assets = df.columns
+# assets = df.columns
 
-from pypfopt.efficient_frontier import EfficientFrontier
-from pypfopt import risk_models
-from pypfopt import expected_returns
+# from pypfopt.efficient_frontier import EfficientFrontier
+# from pypfopt import risk_models
+# from pypfopt import expected_returns
  
-mu = expected_returns.mean_historical_return(df)
-S = risk_models.sample_cov(df)
+# mu = expected_returns.mean_historical_return(df)
+# S = risk_models.sample_cov(df)
 
-ef = EfficientFrontier(mu, S)
-weights = ef.max_sharpe()
+# ef = EfficientFrontier(mu, S)
+# weights = ef.max_sharpe()
 
-cleaned_weights = ef.clean_weights()
-# print(cleaned_weights)
+# cleaned_weights = ef.clean_weights()
+# # print(cleaned_weights)
 
-ef.portfolio_performance(verbose=True)
-from pypfopt.discrete_allocation import DiscreteAllocation, get_latest_prices
+# ef.portfolio_performance(verbose=True)
+# from pypfopt.discrete_allocation import DiscreteAllocation, get_latest_prices
 
-portfolio_val = 10000
-latest_prices = get_latest_prices(df)
-weights = cleaned_weights 
-da = DiscreteAllocation(weights, latest_prices,total_portfolio_value= portfolio_val)
+# portfolio_val = 10000
+# latest_prices = get_latest_prices(df)
+# weights = cleaned_weights 
+# da = DiscreteAllocation(weights, latest_prices,total_portfolio_value= portfolio_val)
 
-allocation , leftover = da.lp_portfolio()
-# print("Discrete allocation:", allocation)
-# print("Funds:rupees", leftover)
+# allocation , leftover = da.lp_portfolio()
+# # print("Discrete allocation:", allocation)
+# # print("Funds:rupees", leftover)
 
-change_asset_list = []
-for ticker in df2['Company Tickers'].values:
-    better_assets = df2.loc[(df2['Expected Annual Returns'] > df2['Expected Annual Returns'][ticker]) & (df2['Expected Annual Risks'] < df2['Expected Annual Risks'][ticker])].empty
-    if better_assets == False:
-        change_asset_list.append(ticker)
-df2.drop(change_asset_list, inplace=True)
-# print(df2)
+# change_asset_list = []
+# for ticker in df2['Company Tickers'].values:
+#     better_assets = df2.loc[(df2['Expected Annual Returns'] > df2['Expected Annual Returns'][ticker]) & (df2['Expected Annual Risks'] < df2['Expected Annual Risks'][ticker])].empty
+#     if better_assets == False:
+#         change_asset_list.append(ticker)
+# df2.drop(change_asset_list, inplace=True)
+# # print(df2)
         
 
